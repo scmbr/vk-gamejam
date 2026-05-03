@@ -8,11 +8,12 @@ import (
 )
 
 type UserUsecase struct {
-	userRepo repository.UserRepository
+	userRepo  repository.UserRepository
+	childRepo repository.ChildProfileRepository
 }
 
-func NewUserUsecase(r repository.UserRepository) *UserUsecase {
-	return &UserUsecase{r}
+func NewUserUsecase(u repository.UserRepository, c repository.ChildProfileRepository) *UserUsecase {
+	return &UserUsecase{userRepo: u, childRepo: c}
 }
 
 func (uc *UserUsecase) GetByID(ctx context.Context, id int64) (*domain.User, error) {

@@ -15,16 +15,23 @@ func mapUserModelToDomain(m *models.UserModel) *domain.User {
 }
 
 func mapChildProfileModelToDomain(m *models.ChildProfileModel) *domain.ChildProfile {
+	var pin *string
+	if m.ParentPin.Valid {
+		pin = &m.ParentPin.String
+	}
+
 	return &domain.ChildProfile{
-		ID:        m.ID,
-		UserID:    m.UserID,
-		Name:      m.Name,
-		Gender:    m.Gender,
-		ParentPin: m.ParentPin,
-		HasPet:    m.HasPet,
+		ID:            m.ID,
+		UserID:        m.UserID,
+		Name:          m.Name,
+		Gender:        m.Gender,
+		ParentPin:     pin,
+		HasPet:        m.HasPet,
+		IsFirstLaunch: m.IsFirstLaunch,
+		LastLogin:     m.LastLogin,
+		LastLogout:    m.LastLogout,
 	}
 }
-
 func mapPetModelToDomain(m *models.PetModel) *domain.Pet {
 	return &domain.Pet{
 		UserID:     m.UserID,

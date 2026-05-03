@@ -46,16 +46,38 @@ func (r *petRepository) SaveState(ctx context.Context, p *domain.Pet) error {
 		)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
 		ON CONFLICT (user_id) DO UPDATE SET
-			name=EXCLUDED.name,
-			type=EXCLUDED.type,
-			gender=EXCLUDED.gender,
-			level=EXCLUDED.level,
-			xp=EXCLUDED.xp,
-			knowledge=EXCLUDED.knowledge,
-			energy=EXCLUDED.energy,
-			creativity=EXCLUDED.creativity,
-			sport=EXCLUDED.sport,
-			last_online=EXCLUDED.last_online
+			level = EXCLUDED.level,
+			xp = EXCLUDED.xp,
+			knowledge = EXCLUDED.knowledge,
+			energy = EXCLUDED.energy,
+			creativity = EXCLUDED.creativity,
+			sport = EXCLUDED.sport,
+			last_online = EXCLUDED.last_online
+	`,
+		p.UserID,
+		p.Name,
+		p.Type,
+		p.Gender,
+		p.Level,
+		p.XP,
+		p.Knowledge,
+		p.Energy,
+		p.Creativity,
+		p.Sport,
+		p.LastOnline,
+	)
+
+	return err
+}
+func (r *petRepository) Create(ctx context.Context, p *domain.Pet) error {
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO pets (
+			user_id, name, type, gender,
+			level, xp,
+			knowledge, energy, creativity, sport,
+			last_online
+		)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
 	`,
 		p.UserID,
 		p.Name,

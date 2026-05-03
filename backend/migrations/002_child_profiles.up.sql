@@ -8,5 +8,9 @@ CREATE TABLE IF NOT EXISTS child_profiles (
     child_name TEXT,
     child_gender TEXT,
     parent_pin TEXT,
-    has_pet BOOLEAN DEFAULT FALSE
+    has_pet BOOLEAN DEFAULT FALSE,
+
+    is_first_launch BOOLEAN DEFAULT TRUE,
+    last_login TIMESTAMP,
+    last_logout TIMESTAMP
 );

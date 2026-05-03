@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/jmoiron/sqlx"
 
@@ -21,9 +22,12 @@ func NewChildProfileRepository(db *sqlx.DB) irepo.ChildProfileRepository {
 func (r *childProfileRepository) GetByUserID(ctx context.Context, userID int64) (*domain.ChildProfile, error) {
 	var m models.ChildProfileModel
 
-	err := r.db.GetContext(ctx, &m,
-		`SELECT id, user_id, child_name, child_gender, parent_pin, has_pet
-		 FROM child_profiles WHERE user_id=$1`,
+	err := r.db.GetContext(ctx, &m, `
+		SELECT id, user_id,
+		       child_name, child_gender, parent_pin, has_pet,
+		       is_first_launch, last_login, last_logout
+		FROM child_profiles
+		WHERE user_id=$1`,
 		userID,
 	)
 	if err != nil {
@@ -32,17 +36,28 @@ func (r *childProfileRepository) GetByUserID(ctx context.Context, userID int64) 
 
 	return mapChildProfileModelToDomain(&m), nil
 }
-
 func (r *childProfileRepository) Create(ctx context.Context, p *domain.ChildProfile) error {
 	return r.db.QueryRowxContext(ctx, `
-		INSERT INTO child_profiles (user_id, child_name, child_gender, parent_pin, has_pet)
-		VALUES ($1,$2,$3,$4,$5)
+		INSERT INTO child_profiles (
+			user_id,
+			child_name,
+			child_gender,
+			parent_pin,
+			has_pet,
+			is_first_launch,
+			last_login,
+			last_logout
+		)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
 		RETURNING id`,
 		p.UserID,
 		p.Name,
 		p.Gender,
-		p.ParentPin,
+		toNullString(p.ParentPin), // ✔
 		p.HasPet,
+		p.IsFirstLaunch,
+		p.LastLogin,
+		p.LastLogout,
 	).Scan(&p.ID)
 }
 
@@ -52,14 +67,26 @@ func (r *childProfileRepository) Update(ctx context.Context, p *domain.ChildProf
 			child_name=$1,
 			child_gender=$2,
 			parent_pin=$3,
-			has_pet=$4
-		WHERE user_id=$5`,
+			has_pet=$4,
+			is_first_launch=$5,
+			last_login=$6,
+			last_logout=$7
+		WHERE user_id=$8`,
 		p.Name,
 		p.Gender,
-		p.ParentPin,
+		toNullString(p.ParentPin), // ✔
 		p.HasPet,
+		p.IsFirstLaunch,
+		p.LastLogin,
+		p.LastLogout,
 		p.UserID,
 	)
 
 	return err
+}
+func toNullString(s *string) sql.NullString {
+	if s == nil {
+		return sql.NullString{Valid: false}
+	}
+	return sql.NullString{String: *s, Valid: true}
 }

@@ -36,7 +36,7 @@ func NewAuthUsecase(
 		refreshTTL: refreshTTL,
 	}
 }
-func (uc *AuthUsecase) Register(ctx context.Context, email, rawPassword, childName, gender, parentPin string) (access string, refresh string, err error) {
+func (uc *AuthUsecase) Register(ctx context.Context, email, rawPassword string) (access string, refresh string, err error) {
 	_, err = uc.userRepo.GetByEmail(ctx, email)
 	if err == nil {
 		return "", "", ErrUserAlreadyExists
@@ -48,6 +48,7 @@ func (uc *AuthUsecase) Register(ctx context.Context, email, rawPassword, childNa
 	user := &domain.User{
 		Email:        email,
 		PasswordHash: passwordHash,
+
 	}
 
 	err = uc.userRepo.Create(ctx, user)
@@ -102,15 +103,33 @@ func (uc *AuthUsecase) Login(ctx context.Context, email, rawPassword string) (ac
 }
 
 
-func (uc *AuthUsecase) Refresh(ctx context.Context, refreshToken string) (string, error) {
+func (uc *AuthUsecase) Refresh(ctx context.Context, refreshToken string) (string, string, error) {
 	hash := hashToken(refreshToken)
 
 	userID, err := uc.authRepo.GetUserIDByRefresh(ctx, hash)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return jwt.Generate(userID, uc.jwtSecret, uc.accessTTL)
+
+	if err := uc.authRepo.DeleteRefreshToken(ctx, hash); err != nil {
+		return "", "", err
+	}
+
+	newRefresh := uuid.New().String()
+	newHash := hashToken(newRefresh)
+
+	err = uc.authRepo.SaveRefreshToken(ctx, userID, newHash, time.Now().Add(uc.refreshTTL))
+	if err != nil {
+		return "", "", err
+	}
+
+	access, err := jwt.Generate(userID, uc.jwtSecret, uc.accessTTL)
+	if err != nil {
+		return "", "", err
+	}
+
+	return access, newRefresh, nil
 }
 
 func (uc *AuthUsecase) Logout(ctx context.Context, refreshToken string) error {
