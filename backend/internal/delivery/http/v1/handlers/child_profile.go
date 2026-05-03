@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/scmbr/vk-gamejam/backend/internal/delivery/http/v1/dto"
 	"github.com/scmbr/vk-gamejam/backend/internal/domain"
 	"github.com/scmbr/vk-gamejam/backend/internal/usecase"
 )
@@ -16,11 +17,7 @@ func NewChildProfileHandler(uc *usecase.ChildProfileUsecase) *ChildProfileHandle
 func (h *ChildProfileHandler) Create(c *gin.Context) {
 	userID := c.GetInt64("userID")
 
-	var req struct {
-		Name      string  `json:"name" binding:"required"`
-		Gender    string  `json:"gender" binding:"required"`
-		ParentPin *string `json:"parentPin"` // nullable
-	}
+	var req dto.CreateChildProfileRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -43,15 +40,27 @@ func (h *ChildProfileHandler) Create(c *gin.Context) {
 
 	c.Status(201)
 }
+func (h *ChildProfileHandler) Get(c *gin.Context) {
+	userID := c.GetInt64("userID")
 
+	profile, err := h.uc.GetByUserID(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(404, gin.H{"error": "profile not found"})
+		return
+	}
+
+	c.JSON(200, dto.ChildProfileResponse{
+		Name:          profile.Name,
+		Gender:        profile.Gender,
+		ParentPin:     profile.ParentPin,
+		HasPet:        profile.HasPet,
+		IsFirstLaunch: profile.IsFirstLaunch,
+	})
+}
 func (h *ChildProfileHandler) Update(c *gin.Context) {
 	userID := c.GetInt64("userID")
 
-	var req struct {
-		Name      *string `json:"name"`
-		Gender    *string `json:"gender"`
-		ParentPin *string `json:"parentPin"`
-	}
+	var req dto.UpdateChildProfileRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})

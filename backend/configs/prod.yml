@@ -1,0 +1,4 @@
+postgres:
+  host: db
+  port: 5432
+  sslmode: disable

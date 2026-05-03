@@ -23,15 +23,16 @@ func RegisterRoutes(r *gin.Engine, h *handlers.Handler, authMW gin.HandlerFunc) 
 	protected.Use(authMW)
 	{
 		// USER
-		protected.GET("/user/me", h.User.Me)
+		protected.GET("/users/me", h.User.Me)
 
 		// CHILD PROFILE
 		protected.POST("/child/profile", h.Child.Create)
 		protected.PUT("/child/profile", h.Child.Update)
+		protected.GET("/child/profile", h.Child.Get)
 
 		// PET
-		protected.GET("/pet/state", h.Pet.GetState)
-		protected.PUT("/pet/state", h.Pet.SaveState)
-		protected.POST("/pet/create", h.Pet.Create)
+		protected.GET("/pets/me", h.Pet.GetState)
+		protected.PUT("/pets/me", h.Pet.SaveState)
+		protected.POST("/pets", h.Pet.Create)
 	}
 }

@@ -1,0 +1,8 @@
+http:
+  port: 8000
+  maxHeaderBytes: 1048576  # 1 MB
+  readTimeout: 10s
+  writeTimeout: 10s
+auth:
+  accessTokenTTL: 15m
+  refreshTokenTTL: 720h
