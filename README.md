@@ -143,7 +143,6 @@ activities         — история активностей (type, confirmed_by
 ```bash
 # Клонировать репозиторий
 git clone https://github.com/scmbr/vk-gamejam
-cd vk-gamejam/backend
 
 ```
 
