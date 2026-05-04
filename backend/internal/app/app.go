@@ -49,7 +49,7 @@ func Run(configsDir string) {
 	authRepo := repository.NewAuthRepository(db)
 	activityRepo := repository.NewActivityRepository(db)
 	userUC := usecase.NewUserUsecase(userRepo, childRepo)
-	petUC := usecase.NewPetUsecase(petRepo)
+	petUC := usecase.NewPetUsecase(petRepo,childRepo)
 	childUC := usecase.NewChildProfileUsecase(childRepo)
 	authUC := usecase.NewAuthUsecase(userRepo, authRepo, cfg.Auth.JWTSecret, cfg.Auth.AccessTokenTTL, cfg.Auth.RefreshTokenTTL)
 	activityUC := usecase.NewActivityUsecase(activityRepo)

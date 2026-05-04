@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAccessToken, setAccessToken } from "../api/client";
 import client from "../api/client";
-import type { AuthResponse } from "../types";
+
 import styles from "./GamePage.module.css";
 
 declare global {
@@ -41,23 +41,28 @@ const GamePage = () => {
     };
 
     // Unity просит refresh
+    let refreshPromise: Promise<string> | null = null;
+
     const handleRefreshRequest = async () => {
-      try {
-        const { data } = await client.post<AuthResponse>("/auth/refresh");
-        setAccessToken(data.accessToken);
-        unityInstanceRef.current?.SendMessage(
-          "TokenBridge",
-          "OnTokenRefreshed",
-          data.accessToken,
-        );
-      } catch (error: any) {
-        // Только если 401 — токен реально протух
-        if (error.response?.status === 401) {
-          navigate("/login");
-        }
-        // Иначе просто логируем — возможно race condition
-        console.error("Refresh failed:", error);
+      if (!refreshPromise) {
+        refreshPromise = client
+          .post("/auth/refresh")
+          .then((res) => {
+            setAccessToken(res.data.accessToken);
+            return res.data.accessToken;
+          })
+          .finally(() => {
+            refreshPromise = null;
+          });
       }
+
+      const token = await refreshPromise;
+
+      unityInstanceRef.current?.SendMessage(
+        "TokenBridge",
+        "OnTokenRefreshed",
+        token,
+      );
     };
 
     // beforeunload — надёжное сохранение при закрытии вкладки

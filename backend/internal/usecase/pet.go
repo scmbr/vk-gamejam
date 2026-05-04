@@ -10,10 +10,11 @@ import (
 
 type PetUsecase struct {
 	repo repository.PetRepository
+	childRepo repository.ChildProfileRepository
 }
 
-func NewPetUsecase(r repository.PetRepository) *PetUsecase {
-	return &PetUsecase{r}
+func NewPetUsecase(r repository.PetRepository, childRepo repository.ChildProfileRepository) *PetUsecase {
+	return &PetUsecase{repo:r,childRepo: childRepo,}
 }
 
 func (uc *PetUsecase) GetState(ctx context.Context, userID int64) (*domain.Pet, error) {
@@ -29,7 +30,15 @@ func (uc *PetUsecase) Create(ctx context.Context, p *domain.Pet) error {
 	p.Sport = 80
 	p.LastOnline = time.Now().UTC()
 
-	return uc.repo.Create(ctx, p)
+	err:= uc.repo.Create(ctx, p)
+	if err!=nil{
+		return err
+	}
+	err=uc.childRepo.MarkHasPet(ctx, p.UserID)
+	if err!=nil{
+		return err
+	}
+	return nil
 }
 
 func (uc *PetUsecase) SaveState(ctx context.Context, p *domain.Pet) error {

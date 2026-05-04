@@ -84,6 +84,15 @@ func (r *childProfileRepository) Update(ctx context.Context, p *domain.ChildProf
 
 	return err
 }
+func (r *childProfileRepository) MarkHasPet(ctx context.Context, userID int64) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE child_profiles
+		SET has_pet = true
+		WHERE user_id = $1
+	`, userID)
+
+	return err
+}
 func toNullString(s *string) sql.NullString {
 	if s == nil {
 		return sql.NullString{Valid: false}
