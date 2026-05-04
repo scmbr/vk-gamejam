@@ -29,9 +29,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	setRefreshCookie(c, refresh)
+
 	c.JSON(http.StatusOK, gin.H{
 		"accessToken": access,
-		"refreshToken": refresh,
 	})
 }
 
@@ -47,48 +48,64 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		req.Email,
 		req.Password,
 	)
-
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
+	setRefreshCookie(c, refresh)
+
 	c.JSON(200, gin.H{
-		"accessToken":  access,
-		"refreshToken": refresh,
+		"accessToken": access,
 	})
 }
 
 func (h *AuthHandler) Refresh(c *gin.Context) {
-	var body struct {
-		RefreshToken string `json:"refreshToken"`
-	}
-
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+	refreshToken, err := c.Cookie("refreshToken")
+	if err != nil {
+		c.JSON(401, gin.H{"error": "missing refresh token"})
 		return
 	}
 
-	access, refresh, err := h.uc.Refresh(c.Request.Context(), body.RefreshToken)
+	access, newRefresh, err := h.uc.Refresh(c.Request.Context(), refreshToken)
 	if err != nil {
 		c.JSON(401, gin.H{"error": "invalid refresh token"})
 		return
 	}
 
-	c.JSON(200, dto.AuthResponse{
-		AccessToken:  access,
-		RefreshToken: refresh,
+	setRefreshCookie(c, newRefresh)
+
+	c.JSON(200, gin.H{
+		"accessToken": access,
 	})
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
-	var body struct {
-		RefreshToken string `json:"refreshToken"`
-	}
+	refreshToken, _ := c.Cookie("refreshToken")
 
-	_ = c.ShouldBindJSON(&body)
+	_ = h.uc.Logout(c.Request.Context(), refreshToken)
 
-	_ = h.uc.Logout(c.Request.Context(), body.RefreshToken)
+	// удалить cookie
+	c.SetCookie(
+		"refreshToken",
+		"",
+		-1,
+		"/",
+		"",
+		false,
+		true,
+	)
 
 	c.Status(200)
+}
+func setRefreshCookie(c *gin.Context, token string) {
+	c.SetCookie(
+		"refreshToken",
+		token,
+		60*60*24*30, // 30 дней
+		"/",
+		"",
+		false, // secure (true в prod)
+		true,  // httpOnly
+	)
 }

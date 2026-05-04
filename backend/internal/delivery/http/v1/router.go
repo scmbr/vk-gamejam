@@ -34,5 +34,13 @@ func RegisterRoutes(r *gin.Engine, h *handlers.Handler, authMW gin.HandlerFunc) 
 		protected.GET("/pets/me", h.Pet.GetState)
 		protected.PUT("/pets/me", h.Pet.SaveState)
 		protected.POST("/pets", h.Pet.Create)
+
+		// ACTIVITY
+		protected.GET("/activities", h.Activity.Get)
+		protected.POST("/activities", h.Activity.Create)
+
+		// SESSION
+		protected.POST("/session/ping", h.Session.Ping)
+		protected.POST("/session/end", h.Session.End)
 	}
 }

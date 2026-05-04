@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 
@@ -91,6 +92,15 @@ func (r *petRepository) Create(ctx context.Context, p *domain.Pet) error {
 		p.Sport,
 		p.LastOnline,
 	)
+
+	return err
+}
+func (r *petRepository) UpdateLastOnline(ctx context.Context, userID int64, t time.Time) error {
+	_, err := r.db.ExecContext(ctx, `
+		UPDATE pets
+		SET last_online = $1
+		WHERE user_id = $2
+	`, t, userID)
 
 	return err
 }

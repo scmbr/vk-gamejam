@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/scmbr/vk-gamejam/backend/internal/config"
 	"github.com/scmbr/vk-gamejam/backend/internal/delivery/http/server"
@@ -46,13 +47,22 @@ func Run(configsDir string) {
 	childRepo := repository.NewChildProfileRepository(db)
 	petRepo := repository.NewPetRepository(db)
 	authRepo := repository.NewAuthRepository(db)
+	activityRepo := repository.NewActivityRepository(db)
 	userUC := usecase.NewUserUsecase(userRepo, childRepo)
 	petUC := usecase.NewPetUsecase(petRepo)
 	childUC := usecase.NewChildProfileUsecase(childRepo)
 	authUC := usecase.NewAuthUsecase(userRepo, authRepo, cfg.Auth.JWTSecret, cfg.Auth.AccessTokenTTL, cfg.Auth.RefreshTokenTTL)
-
-	handler := handlers.NewHandler(authUC, userUC, childUC, petUC)
+	activityUC := usecase.NewActivityUsecase(activityRepo)
+	sessionUC := usecase.NewSessionUsecase(petRepo)
+	handler := handlers.NewHandler(authUC, userUC, childUC, petUC, activityUC, sessionUC)
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Authorization", "Content-Type"},
+		AllowCredentials: true,
+	}))
 
 	authMW := middleware.AuthMiddleware(cfg.Auth.JWTSecret)
 

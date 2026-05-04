@@ -5,10 +5,12 @@ import (
 )
 
 type Handler struct {
-	Auth  *AuthHandler
-	User  *UserHandler
-	Child *ChildProfileHandler
-	Pet   *PetHandler
+	Auth     *AuthHandler
+	User     *UserHandler
+	Child    *ChildProfileHandler
+	Pet      *PetHandler
+	Activity *ActivityHandler
+	Session  *SessionHandler
 }
 
 func NewHandler(
@@ -16,12 +18,16 @@ func NewHandler(
 	userUC *usecase.UserUsecase,
 	childUC *usecase.ChildProfileUsecase,
 	petUC *usecase.PetUsecase,
+	activityUC *usecase.ActivityUsecase,
+	sessionUC *usecase.SessionUsecase,
 ) *Handler {
 
 	return &Handler{
-		Auth:  NewAuthHandler(authUC),
-		User:  NewUserHandler(userUC, childUC),
-		Child: NewChildProfileHandler(childUC),
-		Pet:   NewPetHandler(petUC),
+		Auth:     NewAuthHandler(authUC),
+		User:     NewUserHandler(userUC, childUC),
+		Child:    NewChildProfileHandler(childUC),
+		Pet:      NewPetHandler(petUC),
+		Activity: NewActivityHandler(activityUC, childUC),
+		Session:  NewSessionHandler(sessionUC),
 	}
 }

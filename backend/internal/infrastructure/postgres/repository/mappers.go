@@ -47,3 +47,13 @@ func mapPetModelToDomain(m *models.PetModel) *domain.Pet {
 		LastOnline: m.LastOnline,
 	}
 }
+func mapActivityModelToDomain(m *models.Activity) *domain.Activity {
+	return &domain.Activity{
+		ID:                m.ID,
+		ChildProfileID:    m.ChildProfileID,
+		Type:              domain.ActivityType(m.Type),
+		ActivityID:        m.ActivityID,
+		ConfirmedByParent: m.ConfirmedByParent,
+		CreatedAt:         m.CreatedAt,
+	}
+}
