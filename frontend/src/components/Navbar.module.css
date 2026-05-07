@@ -1,42 +1,86 @@
 .navbar {
   display: flex;
+  justify-content: center;
+  background: #fff;
+}
+
+.inner {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 15vw;
+  font-family: "Format-A", sans-serif;
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
-  height: 60px;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
-
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 40px;
   font-size: 20px;
-  font-weight: 700;
-  color: #6c63ff;
+  font-weight: 600;
+  color: #765fde;
 }
 
+.logoImage {
+  width: 120px;
+  height: 120px;
+}
 .links {
   display: flex;
-  gap: 24px;
+  gap: 40px;
 }
 
 .link {
   text-decoration: none;
-  color: #666;
-  font-weight: 500;
-  font-size: 16px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  transition:
-    background 0.2s,
-    color 0.2s;
+  color: #2f2f45;
+  font-weight: 600;
+  font-size: 20px;
 }
 
 .link:hover {
-  background: #f0eeff;
-  color: #6c63ff;
+  color: #ff6170;
 }
 
 .active {
-  background: #f0eeff;
-  color: #6c63ff;
+  color: #ff6170;
+}
+
+@media (max-width: 1024px) {
+  .logoImage {
+    width: 90px;
+    height: 90px;
+  }
+  .inner {
+    padding: 0 12vw;
+  }
+  .link {
+    font-size: 17px;
+  }
+  .logo {
+    font-size: 17px;
+    gap: 17px;
+  }
+
+  .links {
+    gap: 17px;
+  }
+}
+@media (max-width: 768px) {
+  .logoImage {
+    width: 60px;
+    height: 60px;
+  }
+
+  .link {
+    font-size: 12px;
+  }
+  .logo {
+    font-size: 12px;
+    gap: 10px;
+  }
+
+  .links {
+    gap: 10px;
+  }
 }
